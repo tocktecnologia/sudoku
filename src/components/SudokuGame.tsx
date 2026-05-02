@@ -101,14 +101,14 @@ export const SudokuGame: React.FC<SudokuGameProps> = ({
   currentBoard.forEach(row => row.forEach(val => { if (val > 0) counts[val]++; }));
 
   return (
-    <div className="flex flex-col items-center w-full max-w-xl mx-auto px-1">
+    <div className="flex flex-col items-center w-full max-w-2xl mx-auto px-0.5 sm:px-2">
       {/* Game Title */}
       <div className="flex flex-col items-center mt-4 mb-2">
         <h1 className="text-3xl font-bold text-[#2C3E50]">Sudoku Clássico</h1>
       </div>
 
       {/* Stats Bar */}
-      <div className="w-full flex justify-between px-2 mb-4 text-[#7F8C8D]">
+      <div className="w-full flex justify-between px-1 sm:px-2 mb-3 text-[#7F8C8D]">
         <div className="flex flex-col items-center">
           <span className="text-[10px] uppercase font-bold tracking-tighter">Dificuldade</span>
           <span className="text-sm font-medium text-[#2C3E50] capitalize">{difficulty}</span>
@@ -138,7 +138,7 @@ export const SudokuGame: React.FC<SudokuGameProps> = ({
       />
 
       {/* Action Buttons */}
-      <div className="grid grid-cols-4 gap-8 w-full max-w-sm mt-8 mb-6">
+      <div className="grid grid-cols-4 gap-5 sm:gap-8 w-full max-w-sm mt-6 mb-4">
         <button className="flex flex-col items-center gap-1 group">
            <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-white shadow-sm border border-gray-100 group-hover:bg-blue-50 transition-colors">
               <Undo2 className="w-5 h-5 text-[#2C3E50]" />
@@ -189,19 +189,22 @@ export const SudokuGame: React.FC<SudokuGameProps> = ({
       </div>
 
       {/* Bottom Number Pad */}
-      <div className="w-full flex justify-between gap-1 mt-auto">
+      <div className="w-full grid grid-cols-9 gap-1 mt-1 sm:mt-2">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => {
-          const isFull = counts[num] >= 9;
+          const remaining = 9 - counts[num];
+          if (remaining <= 0) return null;
+
           return (
             <button
               key={num}
               onClick={() => handleNumberInput(num)}
               className={cn(
-                "flex-1 py-1 rounded-lg transition-all active:scale-95",
-                isFull ? "opacity-20 pointer-events-none" : "hover:bg-blue-50"
+                "rounded-lg border border-[#D5E7F6] bg-white py-1 px-0.5 transition-all active:scale-95 hover:bg-blue-50",
+                selectedCell ? "opacity-100" : "opacity-95"
               )}
             >
-              <span className="text-4xl text-[#3498DB] font-light leading-none">{num}</span>
+              <div className="text-[1.65rem] sm:text-4xl text-[#3498DB] font-light leading-none">{num}</div>
+              <div className="text-[10px] sm:text-xs text-[#7F8C8D] leading-tight">{remaining} faltam</div>
             </button>
           );
         })}

@@ -39,7 +39,7 @@ export const SudokuGrid: React.FC<SudokuGridProps> = ({
     errorCells.some(([er, ec]) => er === r && ec === c);
 
   return (
-    <div className="relative w-full max-w-[min(90vw,600px)] aspect-square mx-auto">
+    <div className="relative w-full max-w-[min(96vw,680px)] aspect-square mx-auto">
       <div className={cn(
         "grid grid-cols-9 border-[3px] w-full h-full shadow-sm bg-white",
         "border-[#34495E]"
@@ -58,7 +58,7 @@ export const SudokuGrid: React.FC<SudokuGridProps> = ({
                 whileTap={{ scale: 0.98 }}
                 onClick={() => onCellClick(rIdx, cIdx)}
                 className={cn(
-                  "relative flex items-center justify-center text-3xl md:text-4xl cursor-pointer transition-all duration-100 border-[0.5px]",
+                  "relative flex items-center justify-center text-[clamp(1.25rem,4.8vw,2.25rem)] cursor-pointer transition-all duration-100 border-[0.5px]",
                   "border-[#BDC3C7]",
                   theme.text,
                   related && !selected && !error && "bg-[#EBF5FB]",
