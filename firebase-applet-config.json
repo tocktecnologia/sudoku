@@ -1,10 +1,9 @@
 {
-  "projectId": "auto-marketing-d1c6d",
-  "appId": "1:355869680100:web:75461140e076dc028d67f1",
-  "apiKey": "AIzaSyCBiVfh--19e6vx8xXYZNV8wdPkoGfQxOk",
-  "authDomain": "auto-marketing-d1c6d.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-fc9b7f92-882d-4189-94fa-ec5183b0da81",
-  "storageBucket": "auto-marketing-d1c6d.firebasestorage.app",
-  "messagingSenderId": "355869680100",
-  "measurementId": ""
+  "apiKey": "AIzaSyC4DqEgBOQOg7WwsPMpT3iQp8v1gF0NfNA",
+  "authDomain": "sudoku-ia.firebaseapp.com",
+  "projectId": "sudoku-ia",
+  "storageBucket": "sudoku-ia.firebasestorage.app",
+  "messagingSenderId": "455848334305",
+  "appId": "1:455848334305:web:973346693c9969a8c5b8a0",
+  "measurementId": "G-V44XYRDQQT"
 }

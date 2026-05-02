@@ -8,7 +8,6 @@ interface SudokuGridProps {
   initialBoard: number[][];
   selectedCell: [number, number] | null;
   onCellClick: (row: number, col: number) => void;
-  onNumberSelect: (num: number) => void;
   errorCells: [number, number][];
   theme: Theme;
 }
@@ -21,6 +20,52 @@ export const SudokuGrid: React.FC<SudokuGridProps> = ({
   errorCells,
   theme
 }) => {
+  const themeGridStyles: Record<string, {
+    majorBorder: string;
+    minorBorder: string;
+    relatedCell: string;
+    sameValueCell: string;
+    initialNumber: string;
+    playerNumber: string;
+  }> = {
+    Classic: {
+      majorBorder: 'border-[#34495E]',
+      minorBorder: 'border-[#BDC3C7]',
+      relatedCell: 'bg-[#EBF5FB]',
+      sameValueCell: 'bg-[#D8ECFF]',
+      initialNumber: 'text-[#1A2B3B] font-semibold',
+      playerNumber: 'text-[#1D72D8] font-semibold',
+    },
+    'Dark Slate': {
+      majorBorder: 'border-slate-500',
+      minorBorder: 'border-slate-600',
+      relatedCell: 'bg-slate-700/70',
+      sameValueCell: 'bg-sky-900/55',
+      initialNumber: 'text-slate-100 font-semibold',
+      playerNumber: 'text-sky-300 font-semibold',
+    },
+    Forest: {
+      majorBorder: 'border-emerald-600',
+      minorBorder: 'border-emerald-800/80',
+      relatedCell: 'bg-emerald-800/65',
+      sameValueCell: 'bg-emerald-700/75',
+      initialNumber: 'text-emerald-50 font-semibold',
+      playerNumber: 'text-emerald-300 font-semibold',
+    },
+    Minimalist: {
+      majorBorder: 'border-black',
+      minorBorder: 'border-gray-300',
+      relatedCell: 'bg-gray-100',
+      sameValueCell: 'bg-blue-100',
+      initialNumber: 'text-black font-semibold',
+      playerNumber: 'text-blue-700 font-semibold',
+    },
+  };
+
+  const visual = themeGridStyles[theme.name] ?? themeGridStyles.Classic;
+  const selectedValue = selectedCell ? board[selectedCell[0]][selectedCell[1]] : 0;
+  const boardSize = 'min(98vw, calc(100dvh - clamp(220px, 34dvh, 360px)), 920px)';
+
   const isSelected = (r: number, c: number) => 
     selectedCell?.[0] === r && selectedCell?.[1] === c;
 
@@ -38,11 +83,18 @@ export const SudokuGrid: React.FC<SudokuGridProps> = ({
   const isError = (r: number, c: number) =>
     errorCells.some(([er, ec]) => er === r && ec === c);
 
+  const isSameValue = (r: number, c: number) =>
+    selectedValue !== 0 && board[r][c] === selectedValue;
+
   return (
-    <div className="relative w-full max-w-[min(96vw,680px)] aspect-square mx-auto">
+    <div
+      className="relative mx-auto"
+      style={{ width: boardSize, height: boardSize, maxWidth: '100%' }}
+    >
       <div className={cn(
-        "grid grid-cols-9 border-[3px] w-full h-full shadow-sm bg-white",
-        "border-[#34495E]"
+        'grid grid-cols-9 border-[3px] w-full h-full shadow-sm',
+        theme.cell,
+        visual.majorBorder
       )}>
         {board.map((row, rIdx) => 
           row.map((val, cIdx) => {
@@ -50,6 +102,7 @@ export const SudokuGrid: React.FC<SudokuGridProps> = ({
             const selected = isSelected(rIdx, cIdx);
             const related = isRelated(rIdx, cIdx);
             const error = isError(rIdx, cIdx);
+            const sameValue = isSameValue(rIdx, cIdx);
 
             return (
               <motion.div
@@ -58,15 +111,15 @@ export const SudokuGrid: React.FC<SudokuGridProps> = ({
                 whileTap={{ scale: 0.98 }}
                 onClick={() => onCellClick(rIdx, cIdx)}
                 className={cn(
-                  "relative flex items-center justify-center text-[clamp(1.25rem,4.8vw,2.25rem)] cursor-pointer transition-all duration-100 border-[0.5px]",
-                  "border-[#BDC3C7]",
-                  theme.text,
-                  related && !selected && !error && "bg-[#EBF5FB]",
-                  selected && !error && "bg-[#AED6F1]",
-                  error && "bg-red-50 text-red-500 font-bold",
-                  rIdx % 3 === 0 && rIdx !== 0 && "border-t-[3px] border-t-[#34495E]",
-                  cIdx % 3 === 0 && cIdx !== 0 && "border-l-[3px] border-l-[#34495E]",
-                  "h-full select-none"
+                  'relative flex items-center justify-center text-[clamp(1.75rem,6.7vw,3.15rem)] cursor-pointer transition-all duration-100 border-[0.5px] h-full select-none',
+                  theme.cell,
+                  visual.minorBorder,
+                  related && !selected && !sameValue && !error && visual.relatedCell,
+                  sameValue && !selected && !error && visual.sameValueCell,
+                  selected && !error && theme.selected,
+                  error && theme.error,
+                  rIdx % 3 === 0 && rIdx !== 0 && `border-t-[3px] ${visual.majorBorder}`,
+                  cIdx % 3 === 0 && cIdx !== 0 && `border-l-[3px] ${visual.majorBorder}`
                 )}
               >
                 <AnimatePresence mode="wait">
@@ -76,7 +129,8 @@ export const SudokuGrid: React.FC<SudokuGridProps> = ({
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       className={cn(
-                        isInitial ? "font-normal text-[#1A2B3B]" : "font-light text-[#3498DB]"
+                        isInitial ? visual.initialNumber : visual.playerNumber,
+                        error && 'text-red-600 font-bold'
                       )}
                     >
                       {val}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { Sudoku, Difficulty, DIFFICULTY_PARAMS } from '@/src/lib/sudoku';
 import { SudokuGrid } from './SudokuGrid';
 import { Theme } from '@/src/types';
@@ -29,8 +29,21 @@ export const SudokuGame: React.FC<SudokuGameProps> = ({
   const [time, setTime] = useState(0);
   const [isGameOver, setIsGameOver] = useState(false);
   const [errorCells, setErrorCells] = useState<[number, number][]>([]);
+  const [showLoseDialog, setShowLoseDialog] = useState(false);
 
   const params = DIFFICULTY_PARAMS[difficulty];
+
+  const restartGame = useCallback(() => {
+    const nextGame = Sudoku.generate(difficulty);
+    setGame(nextGame);
+    setCurrentBoard(nextGame.board.map(row => [...row]));
+    setSelectedCell(null);
+    setMistakes(0);
+    setTime(0);
+    setIsGameOver(false);
+    setErrorCells([]);
+    setShowLoseDialog(false);
+  }, [difficulty]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -48,12 +61,12 @@ export const SudokuGame: React.FC<SudokuGameProps> = ({
       const newBoard = currentBoard.map(row => [...row]);
       newBoard[r][c] = num;
       setCurrentBoard(newBoard);
-      
+
       // Check for win
-      const won = newBoard.every((row, ri) => 
+      const won = newBoard.every((row, ri) =>
         row.every((val, ci) => val === game.solution[ri][ci])
       );
-      
+
       if (won) {
         setIsGameOver(true);
         confetti({
@@ -65,18 +78,29 @@ export const SudokuGame: React.FC<SudokuGameProps> = ({
         toast.success("Parabéns! Você completou o Sudoku!");
       }
     } else {
+      const newBoard = currentBoard.map(row => [...row]);
+      newBoard[r][c] = num;
+      setCurrentBoard(newBoard);
+
       setMistakes(prev => {
         const next = prev + 1;
         if (next >= params.mistakes) {
           setIsGameOver(true);
-          toast.error("Fim de Jogo! Você cometeu muitos erros.");
+          setShowLoseDialog(true);
         }
         return next;
       });
+
       setErrorCells(prev => [...prev, [r, c]]);
       setTimeout(() => {
+        setCurrentBoard(prev => {
+          if (prev[r][c] !== num) return prev;
+          const cleared = prev.map(row => [...row]);
+          cleared[r][c] = 0;
+          return cleared;
+        });
         setErrorCells(prev => prev.filter(cell => !(cell[0] === r && cell[1] === c)));
-      }, 1000);
+      }, 700);
     }
   }, [selectedCell, isGameOver, currentBoard, game.board, game.solution, onFinish, params.mistakes, time]);
 
@@ -101,29 +125,30 @@ export const SudokuGame: React.FC<SudokuGameProps> = ({
   currentBoard.forEach(row => row.forEach(val => { if (val > 0) counts[val]++; }));
 
   return (
-    <div className="flex flex-col items-center w-full max-w-2xl mx-auto px-0.5 sm:px-2">
+    <>
+    <div className={cn('flex flex-col items-center w-full max-w-[1100px] mx-auto px-0.5 sm:px-2', theme.text)}>
       {/* Game Title */}
-      <div className="flex flex-col items-center mt-4 mb-2">
-        <h1 className="text-3xl font-bold text-[#2C3E50]">Sudoku Clássico</h1>
+      <div className="flex flex-col items-center mt-2 mb-1">
+        <h1 className="text-2xl sm:text-3xl font-bold">Sudoku Clássico</h1>
       </div>
 
       {/* Stats Bar */}
-      <div className="w-full flex justify-between px-1 sm:px-2 mb-3 text-[#7F8C8D]">
+      <div className="w-full flex justify-between px-1 sm:px-2 mb-2 text-current/70">
         <div className="flex flex-col items-center">
           <span className="text-[10px] uppercase font-bold tracking-tighter">Dificuldade</span>
-          <span className="text-sm font-medium text-[#2C3E50] capitalize">{difficulty}</span>
+          <span className="text-sm font-medium text-current capitalize">{difficulty}</span>
         </div>
         <div className="flex flex-col items-center">
           <span className="text-[10px] uppercase font-bold tracking-tighter">Erros</span>
-          <span className="text-sm font-medium text-[#2C3E50]">{mistakes}/{params.mistakes}</span>
+          <span className="text-sm font-medium text-current">{mistakes}/{params.mistakes}</span>
         </div>
         <div className="flex flex-col items-center">
           <span className="text-[10px] uppercase font-bold tracking-tighter">Pontuação</span>
-          <span className="text-sm font-medium text-[#2C3E50]">{currentBoard.flat().filter(v => v > 0).length * 10}</span>
+          <span className="text-sm font-medium text-current">{currentBoard.flat().filter(v => v > 0).length * 10}</span>
         </div>
         <div className="flex flex-col items-center">
           <span className="text-[10px] uppercase font-bold tracking-tighter">Tempo</span>
-          <span className="text-sm font-medium text-[#2C3E50] font-mono">{formatTime(time)}</span>
+          <span className="text-sm font-medium text-current font-mono">{formatTime(time)}</span>
         </div>
       </div>
 
@@ -138,12 +163,12 @@ export const SudokuGame: React.FC<SudokuGameProps> = ({
       />
 
       {/* Action Buttons */}
-      <div className="grid grid-cols-4 gap-5 sm:gap-8 w-full max-w-sm mt-6 mb-4">
+      <div className="grid grid-cols-4 gap-5 sm:gap-8 w-full max-w-sm mt-4 mb-3">
         <button className="flex flex-col items-center gap-1 group">
-           <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-white shadow-sm border border-gray-100 group-hover:bg-blue-50 transition-colors">
-              <Undo2 className="w-5 h-5 text-[#2C3E50]" />
-           </div>
-           <span className="text-[11px] font-medium text-[#7F8C8D]">Desfazer</span>
+          <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-white shadow-sm border border-gray-100 group-hover:bg-blue-50 transition-colors">
+            <Undo2 className="w-5 h-5 text-current" />
+          </div>
+          <span className="text-[11px] font-medium text-current/70">Desfazer</span>
         </button>
         <button onClick={() => {
           if (selectedCell) {
@@ -155,36 +180,36 @@ export const SudokuGame: React.FC<SudokuGameProps> = ({
             }
           }
         }} className="flex flex-col items-center gap-1 group">
-           <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-white shadow-sm border border-gray-100 group-hover:bg-blue-50 transition-colors">
-              <Eraser className="w-5 h-5 text-[#2C3E50]" />
-           </div>
-           <span className="text-[11px] font-medium text-[#7F8C8D]">Apagar</span>
+          <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-white shadow-sm border border-gray-100 group-hover:bg-blue-50 transition-colors">
+            <Eraser className="w-5 h-5 text-current" />
+          </div>
+          <span className="text-[11px] font-medium text-current/70">Apagar</span>
         </button>
         <button className="flex flex-col items-center gap-1 group">
-           <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-white shadow-sm border border-gray-100 group-hover:bg-blue-50 transition-colors">
-              <Pencil className="w-5 h-5 text-[#2C3E50]" />
-           </div>
-           <span className="text-[11px] font-medium text-[#7F8C8D]">Notas</span>
+          <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-white shadow-sm border border-gray-100 group-hover:bg-blue-50 transition-colors">
+            <Pencil className="w-5 h-5 text-current" />
+          </div>
+          <span className="text-[11px] font-medium text-current/70">Notas</span>
         </button>
         <button onClick={() => {
-            // Find an empty cell and fill it
-            const emptyCells: [number, number][] = [];
-            currentBoard.forEach((row, ri) => row.forEach((val, ci) => {
-              if (val === 0) emptyCells.push([ri, ci]);
-            }));
-            if (emptyCells.length > 0) {
-              const [r, c] = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-              const newBoard = currentBoard.map(row => [...row]);
-              newBoard[r][c] = game.solution[r][c];
-              setCurrentBoard(newBoard);
-              setSelectedCell([r, c]);
-            }
+          // Find an empty cell and fill it
+          const emptyCells: [number, number][] = [];
+          currentBoard.forEach((row, ri) => row.forEach((val, ci) => {
+            if (val === 0) emptyCells.push([ri, ci]);
+          }));
+          if (emptyCells.length > 0) {
+            const [r, c] = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+            const newBoard = currentBoard.map(row => [...row]);
+            newBoard[r][c] = game.solution[r][c];
+            setCurrentBoard(newBoard);
+            setSelectedCell([r, c]);
+          }
         }} className="flex flex-col items-center gap-1 group">
-           <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-white shadow-sm border border-gray-100 group-hover:bg-blue-50 transition-colors relative">
-              <Lightbulb className="w-5 h-5 text-[#2C3E50]" />
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full text-[10px] flex items-center justify-center text-white font-bold">1</div>
-           </div>
-           <span className="text-[11px] font-medium text-[#7F8C8D]">Dica</span>
+          <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-white shadow-sm border border-gray-100 group-hover:bg-blue-50 transition-colors relative">
+            <Lightbulb className="w-5 h-5 text-current" />
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full text-[10px] flex items-center justify-center text-white font-bold">1</div>
+          </div>
+          <span className="text-[11px] font-medium text-current/70">Dica</span>
         </button>
       </div>
 
@@ -204,16 +229,40 @@ export const SudokuGame: React.FC<SudokuGameProps> = ({
               )}
             >
               <div className="text-[1.65rem] sm:text-4xl text-[#3498DB] font-light leading-none">{num}</div>
-              <div className="text-[10px] sm:text-xs text-[#7F8C8D] leading-tight">{remaining} faltam</div>
+              <div className="text-[10px] sm:text-xs text-current/70 leading-tight">{remaining}</div>
             </button>
           );
         })}
       </div>
-      
+
       {/* Footer / Back link */}
-      <Button variant="ghost" onClick={onQuit} className="mt-8 mb-4 text-[#7F8C8D] hover:text-[#2C3E50]">
+      <Button variant="ghost" onClick={onQuit} className="mt-4 mb-2 text-current/70 hover:text-current">
         Sair do Jogo
       </Button>
     </div>
+    {showLoseDialog && (
+      <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.92, y: 16 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.22, ease: 'easeOut' }}
+          className="w-full max-w-sm rounded-2xl border border-white/20 bg-white p-6 text-[#1f2937] shadow-2xl"
+        >
+          <h3 className="text-2xl font-extrabold">Você perdeu!</h3>
+          <p className="mt-2 text-sm text-slate-600">
+            Você atingiu o limite de erros ({mistakes}/{params.mistakes}).
+          </p>
+          <div className="mt-5 grid grid-cols-2 gap-3">
+            <Button variant="outline" onClick={onQuit}>
+              Home
+            </Button>
+            <Button onClick={restartGame}>
+              Reiniciar
+            </Button>
+          </div>
+        </motion.div>
+      </div>
+    )}
+    </>
   );
 };

@@ -44,14 +44,26 @@ service cloud.firestore {
     // Challenges
     match /challenges/{challengeId} {
       allow read: if true;
-      allow create: if isSignedIn() && isValidId(challengeId);
-      allow update: if isSignedIn() && (
-        // Allow updating players info if the user is one of the players
-        (request.resource.data.players.p1.uid == request.auth.uid || 
-         request.resource.data.players.p2.uid == request.auth.uid ||
-         // Allow joining as P2 if P2 is empty
-         (resource.data.players.p2.uid == null && request.resource.data.players.p2.uid == request.auth.uid))
-      );
+
+      function isParticipant(data) {
+        return data.players[request.auth.uid] != null &&
+               data.players[request.auth.uid].uid == request.auth.uid;
+      }
+
+      allow create: if isSignedIn() &&
+                    isValidId(challengeId) &&
+                    request.resource.data.keys().hasAll(['board', 'solution', 'difficulty', 'status', 'players', 'createdAt']) &&
+                    request.resource.data.status == 'waiting' &&
+                    request.resource.data.difficulty in ['easy', 'medium', 'moderate', 'hard'] &&
+                    isParticipant(request.resource.data);
+
+      allow update: if isSignedIn() &&
+                    isParticipant(request.resource.data) &&
+                    request.resource.data.board == resource.data.board &&
+                    request.resource.data.solution == resource.data.solution &&
+                    request.resource.data.createdAt == resource.data.createdAt &&
+                    request.resource.data.difficulty == resource.data.difficulty &&
+                    request.resource.data.status in ['waiting', 'playing', 'finished'];
     }
   }
 }

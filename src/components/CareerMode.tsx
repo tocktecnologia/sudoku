@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { UserData, THEMES } from '@/src/types';
 import { getSudokuHistory } from '@/src/lib/gemini';
 import { SudokuGame } from './SudokuGame';
@@ -57,7 +57,7 @@ export const CareerMode: React.FC<CareerModeProps> = ({
           careerLevel: nextLevel
         });
         onRefreshUser();
-        toast.success(`Nível ${nextLevel} Concluído! Nova história desbloqueada.`);
+        toast.success(`Nível ${nextLevel} concluído! Nova história desbloqueada.`);
       } catch (err) {
         console.error(err);
       }
@@ -151,3 +151,4 @@ export const CareerMode: React.FC<CareerModeProps> = ({
     </div>
   );
 };
+

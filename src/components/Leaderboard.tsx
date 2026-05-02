@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { db, collection, query, where, orderBy, limit, getDocs } from '@/src/lib/firebase';
 import { Difficulty } from '@/src/lib/sudoku';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -94,3 +94,4 @@ export const Leaderboard: React.FC = () => {
     </div>
   );
 };
+

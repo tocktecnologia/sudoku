@@ -1,13 +1,21 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { getFirestore, doc, getDocFromServer, collection, addDoc, setDoc, getDoc, updateDoc, onSnapshot, query, where, orderBy, limit, getDocs, Timestamp } from 'firebase/firestore';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from 'firebase/auth';
+import { getFirestore, doc, getDocFromServer, collection, addDoc, setDoc, getDoc, updateDoc, onSnapshot, query, where, orderBy, limit, getDocs, Timestamp, runTransaction, increment } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: 'select_account' });
+googleProvider.addScope('email');
+googleProvider.addScope('profile');
 export { doc };
+
+// Completa fluxo de redirect quando popup nao e permitido.
+getRedirectResult(auth).catch((error) => {
+  console.error('Erro no login com redirect do Google:', error);
+});
 
 export async function testConnection() {
   try {
@@ -57,4 +65,4 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
   throw new Error(JSON.stringify(errInfo));
 }
 
-export { collection, addDoc, setDoc, getDoc, updateDoc, onSnapshot, query, where, orderBy, limit, getDocs, Timestamp, signInWithPopup };
+export { collection, addDoc, setDoc, getDoc, updateDoc, onSnapshot, query, where, orderBy, limit, getDocs, Timestamp, runTransaction, increment, signInWithPopup, signInWithRedirect };

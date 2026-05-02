@@ -1,0 +1,26 @@
+{
+  "files": {
+    ".htaccess": {
+      "sha1": "03688e7e54a118c7fbb4148b110ab3e26b3bdbfb"
+    },
+    "assets/geist-cyrillic-wght-normal-CHSlOQsW.woff2": {
+      "sha1": "8df524c537c7463d5ca4edf78c4b03936964aef3"
+    },
+    "assets/geist-latin-ext-wght-normal-DMtmJ5ZE.woff2": {
+      "sha1": "a121653e70e56fb7c07104cfbfab2a9ba3605d75"
+    },
+    "assets/geist-latin-wght-normal-Dm3htQBi.woff2": {
+      "sha1": "a59aabd24d95f76b7e97143fa20c6a4c83a00c63"
+    },
+    "assets/index-CJ3Y2wkx.js": {
+      "sha1": "964f72a089181bf682afb76237488d3102031940"
+    },
+    "assets/index-DRYWxtFT.css": {
+      "sha1": "5caf78e9cd5d2a5bb60f6e83d1dfc2868f2bc4df"
+    },
+    "index.html": {
+      "sha1": "ae450a7f3175fec24c64ffb8dbfc4c0271387476"
+    }
+  },
+  "version": 1
+}

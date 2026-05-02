@@ -12,25 +12,25 @@ export interface UserData {
 }
 
 export interface ChallengeData {
-  id: string;
+  id?: string;
   board: string;
   solution: string;
   difficulty: Difficulty;
   status: 'waiting' | 'playing' | 'finished';
-  players: {
-    p1: PlayerInfo;
-    p2?: PlayerInfo;
-  };
+  players: Record<string, PlayerInfo>;
   createdAt: any;
-  winner?: string;
+  startedAt?: any;
+  winner?: string; // uid do vencedor
 }
 
 export interface PlayerInfo {
   uid: string;
   name: string;
+  photoURL?: string;
   time: number;
   finished: boolean;
   mistakes: number;
+  joinedAt?: any;
 }
 
 export interface Theme {
