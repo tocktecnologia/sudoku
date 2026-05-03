@@ -1,0 +1,85 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Stores user progress and profile information.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "careerLevel": { "type": "integer" },
+        "tokens": { "type": "integer" },
+        "dailyStreak": { "type": "integer" },
+        "lastDailyChallenge": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "displayName"]
+    },
+    "LeaderboardEntry": {
+      "title": "Leaderboard Entry",
+      "description": "Represents a single score on the leaderboard.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "time": { "type": "integer" },
+        "difficulty": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "time", "difficulty"]
+    },
+    "Challenge": {
+      "title": "Multiplayer Challenge",
+      "description": "Stores state for 1v1 online matches.",
+      "type": "object",
+      "properties": {
+        "board": { "type": "string" },
+        "solution": { "type": "string" },
+        "difficulty": { "type": "string" },
+        "status": { "type": "string", "enum": ["waiting", "playing", "finished"] },
+        "players": {
+          "type": "object",
+          "properties": {
+            "p1": {
+              "type": "object",
+              "properties": {
+                "uid": { "type": "string" },
+                "name": { "type": "string" },
+                "time": { "type": "integer" },
+                "finished": { "type": "boolean" },
+                "mistakes": { "type": "integer" }
+              }
+            },
+            "p2": {
+              "type": "object",
+              "properties": {
+                "uid": { "type": "string" },
+                "name": { "type": "string" },
+                "time": { "type": "integer" },
+                "finished": { "type": "boolean" },
+                "mistakes": { "type": "integer" }
+              }
+            }
+          }
+        },
+        "winner": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles and progress."
+    },
+    "/leaderboards/{entryId}": {
+      "schema": "LeaderboardEntry",
+      "description": "Global rankings for different difficulties."
+    },
+    "/challenges/{challengeId}": {
+      "schema": "Challenge",
+      "description": "Active and finished multiplayer games."
+    }
+  }
+}

@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Auth helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // User Profile
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow write: if isOwner(userId);
+      
+      // Validation helper for User
+      function isValidUser(data) {
+        return data.keys().hasAll(['uid', 'displayName']) &&
+               data.uid == request.auth.uid &&
+               data.displayName is string && data.displayName.size() <= 50;
+      }
+    }
+
+    // Leaderboards
+    match /leaderboards/{entryId} {
+      allow read: if true;
+      allow create: if isSignedIn() && 
+                      isValidId(entryId) &&
+                      request.resource.data.userId == request.auth.uid &&
+                      request.resource.data.time is int &&
+                      request.resource.data.difficulty in ['easy', 'medium', 'moderate', 'hard'];
+      allow update, delete: if false; // Rankings are immutable
+    }
+
+    // Challenges
+    match /challenges/{challengeId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isValidId(challengeId);
+      allow update: if isSignedIn() && (
+        // Allow updating players info if the user is one of the players
+        (request.resource.data.players.p1.uid == request.auth.uid || 
+         request.resource.data.players.p2.uid == request.auth.uid ||
+         // Allow joining as P2 if P2 is empty
+         (resource.data.players.p2.uid == null && request.resource.data.players.p2.uid == request.auth.uid))
+      );
+    }
+  }
+}
